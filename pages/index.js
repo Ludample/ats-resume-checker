@@ -389,7 +389,6 @@ export default function Home() {
             <ul>
               <li>ATS keyword match score</li>
               <li>List of missing keywords</li>
-              <li>5 AI-generated resume bullet suggestions</li>
               <li>Instant access after payment — no signup needed</li>
             </ul>
 
@@ -397,7 +396,6 @@ export default function Home() {
             <p>For <strong>$12</strong>, you get:</p>
             <ul>
               <li>Unlimited resume checks and optimizations</li>
-              <li>AI-generated bullet suggestions for every resume</li>
               <li>Priority processing speed</li>
               <li>Email receipt and friendly support</li>
               <li>No subscription — pay once and use for 7 days</li>
