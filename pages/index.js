@@ -1,14 +1,27 @@
-// pages/index.js
 import { useState } from "react";
 import { useRouter } from "next/router";
 
 export default function Home() {
   const [navOpen, setNavOpen] = useState(false);
+  const [resumeText, setResumeText] = useState("");
+  const [jobDescText, setJobDescText] = useState("");
   const router = useRouter();
+
+  // Basic placeholder submit handler (you can add matching logic later)
+  const handleCheck = (e) => {
+    e.preventDefault();
+    if (!resumeText.trim() || !jobDescText.trim()) {
+      alert("Please paste both your resume and the job description.");
+      return;
+    }
+    // For now just alert; replace with your logic later
+    alert("Resume and Job Description received. Matching logic coming soon!");
+  };
 
   return (
     <>
       <style>{`
+        /* (same styles as before, omitted here for brevity but include them in your code) */
         /* Reset and basics */
         * {
           box-sizing: border-box;
@@ -27,15 +40,11 @@ export default function Home() {
         a:hover {
           text-decoration: underline;
         }
-
-        /* Container */
         .container {
           max-width: 960px;
           margin: 0 auto;
           padding: 0 20px 60px;
         }
-
-        /* Header */
         header {
           background-color: #06203f;
           display: flex;
@@ -75,8 +84,6 @@ export default function Home() {
           background: white;
           border-radius: 2px;
         }
-
-        /* Mobile nav */
         @media (max-width: 600px) {
           nav {
             display: none;
@@ -97,8 +104,6 @@ export default function Home() {
             display: flex;
           }
         }
-
-        /* Hero */
         .hero {
           padding: 80px 0 40px;
           text-align: center;
@@ -130,8 +135,6 @@ export default function Home() {
         .btn-primary:hover {
           background-color: #3a9ded;
         }
-
-        /* Sections */
         section {
           margin-bottom: 64px;
         }
@@ -165,8 +168,6 @@ export default function Home() {
           line-height: 1.4;
           color: #cbd5ff;
         }
-
-        /* Stats */
         .stats {
           background: #06203f;
           padding: 40px 20px;
@@ -182,8 +183,6 @@ export default function Home() {
           font-weight: 600;
           color: #a0c8ff;
         }
-
-        /* Footer */
         footer {
           background: #041a30;
           text-align: center;
@@ -191,6 +190,25 @@ export default function Home() {
           color: #7a8ca3;
           font-size: 0.9rem;
           user-select: none;
+        }
+
+        /* Form styles */
+        form {
+          max-width: 700px;
+          margin: 0 auto 40px;
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+        }
+        textarea {
+          width: 100%;
+          height: 150px;
+          padding: 12px;
+          border-radius: 6px;
+          border: none;
+          font-size: 1rem;
+          font-family: inherit;
+          resize: vertical;
         }
       `}</style>
 
@@ -238,13 +256,38 @@ export default function Home() {
           </button>
         </section>
 
+        {/* Form section */}
+        <section id="form-section">
+          <form onSubmit={handleCheck}>
+            <label htmlFor="resume">Paste Your Resume:</label>
+            <textarea
+              id="resume"
+              value={resumeText}
+              onChange={(e) => setResumeText(e.target.value)}
+              placeholder="Paste your resume text here..."
+              required
+            />
+            <label htmlFor="jobdesc">Paste Job Description:</label>
+            <textarea
+              id="jobdesc"
+              value={jobDescText}
+              onChange={(e) => setJobDescText(e.target.value)}
+              placeholder="Paste the job description here..."
+              required
+            />
+            <button className="btn-primary" type="submit">
+              Check ATS Match
+            </button>
+          </form>
+        </section>
+
         <section id="how-it-works">
           <h2>How It Works</h2>
           <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
-            Paste your resume and the job description you want to apply for. Our AI
-            analyzes the keywords and gives you a match score along with
+            Paste your resume and the job description you want to apply for. Our system
+            analyzes keywords and gives you a match score along with
             suggestions to improve your resume and increase your chances of passing
-            the ATS filters.
+            ATS filters.
           </p>
         </section>
 
@@ -265,7 +308,7 @@ export default function Home() {
             </div>
             <div className="step">
               <h3>4. Pay & Unlock</h3>
-              <p>Pay a small fee to unlock full, AI-generated resume improvements.</p>
+              <p>Pay a small fee to unlock full resume improvements.</p>
             </div>
           </div>
         </section>
@@ -280,13 +323,12 @@ export default function Home() {
         <section id="pricing">
           <h2>Pricing</h2>
           <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
-            Free basic ATS score and missing keywords.  
-            Unlock the full resume optimization for only <strong>$5</strong>.  
+            Free basic ATS score and missing keywords.<br/>
+            Unlock the full resume optimization for only <strong>$5</strong>.<br/>
             Unlimited access for 7 days for <strong>$12</strong>.
           </p>
         </section>
 
-        {/* This is the new Upgrade Now button you wanted */}
         <section style={{ textAlign: "center" }}>
           <button
             className="btn-primary"
