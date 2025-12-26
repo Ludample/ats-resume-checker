@@ -1,18 +1,10 @@
+// pages/index.js
 import { useState } from "react";
+import { useRouter } from "next/router";
 
 export default function Home() {
   const [navOpen, setNavOpen] = useState(false);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [scoreData, setScoreData] = useState(null);
-
-  // Dummy function for scoring, replace with your real logic
-  function performScoring() {
-    // For demo, hardcoding values; replace with actual scoring results
-    const score = 75;
-    const missingKeywords = ["leadership", "budgeting", "compliance"];
-    setScoreData({ score, missingKeywords });
-    setModalOpen(true);
-  }
+  const router = useRouter();
 
   return (
     <>
@@ -200,63 +192,6 @@ export default function Home() {
           font-size: 0.9rem;
           user-select: none;
         }
-
-        /* Modal styles */
-        .modal-backdrop {
-          position: fixed;
-          top: 0; left: 0; right: 0; bottom: 0;
-          background: rgba(0,0,0,0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 1000;
-        }
-        .modal {
-          background: #06203f;
-          padding: 24px;
-          border-radius: 8px;
-          max-width: 400px;
-          color: #e0e7ff;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-          text-align: center;
-          user-select: none;
-        }
-        .modal h3 {
-          margin-top: 0;
-          color: #4db5ff;
-        }
-        .modal p {
-          margin-bottom: 16px;
-        }
-        .modal ul {
-          text-align: left;
-          margin-bottom: 20px;
-          padding-left: 20px;
-        }
-        .btn-close, .btn-upgrade {
-          cursor: pointer;
-          border: none;
-          padding: 10px 20px;
-          border-radius: 6px;
-          font-weight: 700;
-          font-size: 1rem;
-          margin: 0 8px;
-          user-select: none;
-        }
-        .btn-close {
-          background: #355080;
-          color: white;
-        }
-        .btn-close:hover {
-          background: #2a3c6f;
-        }
-        .btn-upgrade {
-          background: #4db5ff;
-          color: #06203f;
-        }
-        .btn-upgrade:hover {
-          background: #3a9ded;
-        }
       `}</style>
 
       <header>
@@ -296,9 +231,7 @@ export default function Home() {
           <button
             className="btn-primary"
             onClick={() => {
-              document
-                .getElementById("steps")
-                .scrollIntoView({ behavior: "smooth" });
+              document.getElementById("steps").scrollIntoView({ behavior: "smooth" });
             }}
           >
             Get Started
@@ -308,10 +241,10 @@ export default function Home() {
         <section id="how-it-works">
           <h2>How It Works</h2>
           <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
-            Paste your resume and the job description you want to apply for. Our
-            tool analyzes the keywords and gives you a match score along with
-            suggestions to improve your resume and increase your chances of
-            passing the ATS filters.
+            Paste your resume and the job description you want to apply for. Our AI
+            analyzes the keywords and gives you a match score along with
+            suggestions to improve your resume and increase your chances of passing
+            the ATS filters.
           </p>
         </section>
 
@@ -332,44 +265,35 @@ export default function Home() {
             </div>
             <div className="step">
               <h3>4. Pay & Unlock</h3>
-              <p>Pay a small fee to unlock full, detailed resume improvements.</p>
+              <p>Pay a small fee to unlock full, AI-generated resume improvements.</p>
             </div>
           </div>
         </section>
 
         <section id="stats" className="stats">
           <p>
-            <strong>
-              We’ve helped over 4,200 job seekers improve their resumes and land
-              interviews!
-            </strong>
+            <strong>We’ve helped over 4,200 job seekers improve their resumes and
+            land interviews!</strong>
           </p>
         </section>
 
         <section id="pricing">
           <h2>Pricing</h2>
           <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
-            Free basic ATS score and missing keywords. Unlock the full resume
-            optimization for only <strong>$5</strong>. Unlimited access for 7
-            days for <strong>$12</strong>.
+            Free basic ATS score and missing keywords.  
+            Unlock the full resume optimization for only <strong>$5</strong>.  
+            Unlimited access for 7 days for <strong>$12</strong>.
           </p>
         </section>
 
-        {/* Form section */}
-        <section id="form-section" style={{ marginTop: "40px" }}>
-          <h2>Try It Now</h2>
-          <textarea
-            id="resume-input"
-            placeholder="Paste your resume here"
-            style={{ width: "100%", height: "120px", marginBottom: "10px", padding: "8px", borderRadius: "6px", border: "none", fontSize: "1rem" }}
-          />
-          <textarea
-            id="jobdesc-input"
-            placeholder="Paste the job description here"
-            style={{ width: "100%", height: "120px", marginBottom: "10px", padding: "8px", borderRadius: "6px", border: "none", fontSize: "1rem" }}
-          />
-          <button className="btn-primary" onClick={performScoring}>
-            Check Resume
+        {/* This is the new Upgrade Now button you wanted */}
+        <section style={{ textAlign: "center" }}>
+          <button
+            className="btn-primary"
+            onClick={() => router.push("/pricing")}
+            style={{ marginTop: 20 }}
+          >
+            Upgrade Now
           </button>
         </section>
       </main>
@@ -377,51 +301,6 @@ export default function Home() {
       <footer>
         &copy; {new Date().getFullYear()} ATS Resume Checker. All rights reserved.
       </footer>
-
-      {modalOpen && (
-        <div className="modal-backdrop" onClick={() => setModalOpen(false)}>
-          <div
-            className="modal"
-            onClick={(e) => e.stopPropagation()}
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-title"
-          >
-            <h3 id="modal-title">ATS Match Score: {scoreData.score}%</h3>
-            <p>Missing Keywords:</p>
-            {scoreData.missingKeywords.length ? (
-              <ul>
-                {scoreData.missingKeywords.map((kw, i) => (
-                  <li key={i}>{kw}</li>
-                ))}
-              </ul>
-            ) : (
-              <p>None! Great job!</p>
-            )}
-            <p>
-              Want to learn more about your resume’s quality?{" "}
-              <button
-                className="btn-upgrade"
-                onClick={() => {
-                  setModalOpen(false);
-                  document.getElementById("pricing").scrollIntoView({
-                    behavior: "smooth",
-                  });
-                }}
-              >
-                Upgrade Now
-              </button>
-            </p>
-            <button
-              className="btn-close"
-              onClick={() => setModalOpen(false)}
-              aria-label="Close modal"
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
     </>
   );
 }
