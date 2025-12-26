@@ -4,6 +4,49 @@ import { useState } from "react";
 export default function Home() {
   const [navOpen, setNavOpen] = useState(false);
 
+  // Keyword matching function
+  function analyzeResume(resumeText, jobDescText) {
+    const stopwords = new Set([
+      "the", "and", "for", "with", "you", "your", "are", "this", "that", "have", "from", "was", "will",
+      "but", "not", "all", "any", "can", "our", "out", "get", "has", "had", "they", "his", "her", "she",
+      "him", "them", "were", "who", "what", "when", "where", "how", "why", "which", "also", "about",
+      "than", "then", "there", "these", "those", "its", "may", "must", "one", "two", "for", "in", "on",
+      "at", "by", "an", "or", "of", "to", "is", "it", "as", "be", "if", "we", "do", "so", "no"
+    ]);
+
+    function extractKeywords(text) {
+      return text
+        .toLowerCase()
+        .replace(/[^a-z0-9\s]/g, "")
+        .split(/\s+/)
+        .filter(word => word.length > 2)
+        .filter(word => !stopwords.has(word));
+    }
+
+    const jdWords = new Set(extractKeywords(jobDescText));
+    const resumeWords = new Set(extractKeywords(resumeText));
+
+    const matched = [...jdWords].filter(word => resumeWords.has(word));
+    const missing = [...jdWords].filter(word => !resumeWords.has(word));
+    const score = jdWords.size === 0 ? 0 : Math.round((matched.length / jdWords.size) * 100);
+
+    return { score, matched, missing };
+  }
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const resumeText = e.target.resume.value;
+    const jobDescText = e.target.jobDescription.value;
+
+    const result = analyzeResume(resumeText, jobDescText);
+
+    alert(
+      `ATS Match Score: ${result.score}%\n` +
+      `Missing keywords:\n${result.missing.length > 0 ? result.missing.join(", ") : "None!"}`
+    );
+  };
+
   return (
     <>
       <style>{`
@@ -276,13 +319,7 @@ export default function Home() {
           <h2 style={{ color: "#4db5ff", textAlign: "center", marginBottom: 24 }}>
             Paste Your Resume & Job Description
           </h2>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              alert("Form submitted! Next: implement resume analysis.");
-              // Placeholder, will add real logic soon
-            }}
-          >
+          <form onSubmit={handleSubmit}>
             <label htmlFor="resume" style={{ color: "#cbd5ff", fontWeight: "600" }}>
               Your Resume:
             </label>
@@ -343,7 +380,7 @@ export default function Home() {
         <section id="how-it-works">
           <h2>How It Works</h2>
           <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
-            Paste your resume and the job description you want to apply for. Our AI
+            Paste your resume and the job description you want to apply for. Our tool
             analyzes the keywords and gives you a match score along with
             suggestions to improve your resume and increase your chances of passing
             the ATS filters.
