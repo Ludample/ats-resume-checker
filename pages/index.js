@@ -1,54 +1,88 @@
+// pages/index.js
 import { useState } from "react";
-import { useRouter } from "next/router";
+
+const STOPWORDS = new Set([
+  "i","me","my","myself","we","our","ours","ourselves","you","your","yours",
+  "yourself","yourselves","he","him","his","himself","she","her","hers","herself",
+  "it","its","itself","they","them","their","theirs","themselves","what","which",
+  "who","whom","this","that","these","those","am","is","are","was","were","be",
+  "been","being","have","has","had","having","do","does","did","doing","a","an",
+  "the","and","but","if","or","because","as","until","while","of","at","by","for",
+  "with","about","against","between","into","through","during","before","after",
+  "above","below","to","from","up","down","in","out","on","off","over","under",
+  "again","further","then","once","here","there","when","where","why","how","all",
+  "any","both","each","few","more","most","other","some","such","no","nor","not",
+  "only","own","same","so","than","too","very","s","t","can","will","just","don",
+  "should","now"
+]);
+
+function tokenize(text) {
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9\s]/g, " ") // Remove punctuation
+    .split(/\s+/)
+    .filter(Boolean)
+    .filter(word => !STOPWORDS.has(word));
+}
+
+function getKeywordCounts(words) {
+  const counts = {};
+  words.forEach(w => {
+    counts[w] = (counts[w] || 0) + 1;
+  });
+  return counts;
+}
+
+function extractKeywords(text) {
+  const words = tokenize(text);
+  const counts = getKeywordCounts(words);
+  // Sort by frequency desc
+  const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  // Return top 50 keywords max (to keep manageable)
+  return sorted.slice(0, 50).map(([word]) => word);
+}
+
+function intersection(arr1, arr2) {
+  const set2 = new Set(arr2);
+  return arr1.filter(x => set2.has(x));
+}
 
 export default function Home() {
   const [navOpen, setNavOpen] = useState(false);
-  const [resumeText, setResumeText] = useState("");
-  const [jobDescText, setJobDescText] = useState("");
+  const [resume, setResume] = useState("");
+  const [jobDesc, setJobDesc] = useState("");
   const [result, setResult] = useState(null);
-  const router = useRouter();
+  const [showAlert, setShowAlert] = useState(false);
 
-  // Simple stop words to ignore very common words
-  const stopWords = new Set([
-    "the", "and", "a", "an", "in", "on", "at", "for", "with", "to", "of", "by",
-    "is", "it", "this", "that", "as", "are", "be", "from", "or", "but", "if",
-    "then", "so", "such", "can", "will", "all", "you", "your", "our", "us",
-  ]);
-
-  const extractKeywords = (text) => {
-    return text
-      .toLowerCase()
-      .match(/\b\w+\b/g) // extract words only
-      .filter((word) => word.length > 2 && !stopWords.has(word)) // ignore short/common words
-      .reduce((set, word) => set.add(word), new Set());
-  };
-
-  const handleCheck = (e) => {
-    e.preventDefault();
-
-    if (!resumeText.trim() || !jobDescText.trim()) {
+  function handleCheck() {
+    if (!resume.trim() || !jobDesc.trim()) {
       alert("Please paste both your resume and the job description.");
       return;
     }
 
-    const jobKeywords = extractKeywords(jobDescText);
-    const resumeKeywords = extractKeywords(resumeText);
+    const resumeKeywords = extractKeywords(resume);
+    const jobKeywords = extractKeywords(jobDesc);
 
-    const matchedKeywords = [...jobKeywords].filter((kw) => resumeKeywords.has(kw));
-    const missingKeywords = [...jobKeywords].filter((kw) => !resumeKeywords.has(kw));
+    const matched = intersection(jobKeywords, resumeKeywords);
+    const matchPercent = Math.round((matched.length / jobKeywords.length) * 100);
 
-    const score = Math.round((matchedKeywords.length / jobKeywords.size) * 100);
+    // Missing keywords (jobKeywords not in resumeKeywords)
+    const missing = jobKeywords.filter(k => !resumeKeywords.includes(k));
+
+    // Limit missing to 20 max
+    const missingLimited = missing.slice(0, 20);
 
     setResult({
-      score,
-      missingKeywords,
+      matchPercent,
+      missingKeywords: missingLimited,
     });
-  };
+    setShowAlert(true);
+  }
 
   return (
     <>
       <style>{`
-        /* Your existing styles here, unchanged for brevity */
+        /* Reset and basics */
         * {
           box-sizing: border-box;
         }
@@ -66,11 +100,15 @@ export default function Home() {
         a:hover {
           text-decoration: underline;
         }
+
+        /* Container */
         .container {
           max-width: 960px;
           margin: 0 auto;
           padding: 0 20px 60px;
         }
+
+        /* Header */
         header {
           background-color: #06203f;
           display: flex;
@@ -110,6 +148,8 @@ export default function Home() {
           background: white;
           border-radius: 2px;
         }
+
+        /* Mobile nav */
         @media (max-width: 600px) {
           nav {
             display: none;
@@ -130,8 +170,10 @@ export default function Home() {
             display: flex;
           }
         }
+
+        /* Hero */
         .hero {
-          padding: 80px 0 40px;
+          padding: 40px 0 20px;
           text-align: center;
         }
         .hero h1 {
@@ -161,6 +203,50 @@ export default function Home() {
         .btn-primary:hover {
           background-color: #3a9ded;
         }
+
+        /* Form */
+        label {
+          display: block;
+          margin-bottom: 6px;
+          font-weight: 600;
+        }
+        textarea {
+          width: 100%;
+          min-height: 150px;
+          margin-bottom: 24px;
+          border-radius: 6px;
+          border: none;
+          padding: 12px;
+          font-size: 1rem;
+          font-family: monospace, monospace;
+          resize: vertical;
+        }
+
+        /* Alert style */
+        .alert {
+          background-color: #08305e;
+          padding: 20px;
+          border-radius: 10px;
+          margin: 20px 0;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+          max-width: 700px;
+          margin-left: auto;
+          margin-right: auto;
+        }
+        .alert h3 {
+          margin-top: 0;
+          color: #4db5ff;
+        }
+        .alert ul {
+          list-style-type: disc;
+          padding-left: 20px;
+          color: #cbd5ff;
+          max-height: 200px;
+          overflow-y: auto;
+          margin-bottom: 10px;
+        }
+
+        /* Sections */
         section {
           margin-bottom: 64px;
         }
@@ -194,6 +280,8 @@ export default function Home() {
           line-height: 1.4;
           color: #cbd5ff;
         }
+
+        /* Stats */
         .stats {
           background: #06203f;
           padding: 40px 20px;
@@ -209,6 +297,8 @@ export default function Home() {
           font-weight: 600;
           color: #a0c8ff;
         }
+
+        /* Footer */
         footer {
           background: #041a30;
           text-align: center;
@@ -216,41 +306,6 @@ export default function Home() {
           color: #7a8ca3;
           font-size: 0.9rem;
           user-select: none;
-        }
-        form {
-          max-width: 700px;
-          margin: 0 auto 40px;
-          display: flex;
-          flex-direction: column;
-          gap: 20px;
-        }
-        textarea {
-          width: 100%;
-          height: 150px;
-          padding: 12px;
-          border-radius: 6px;
-          border: none;
-          font-size: 1rem;
-          font-family: inherit;
-          resize: vertical;
-        }
-        .result {
-          max-width: 700px;
-          margin: 0 auto 40px;
-          background: #08305e;
-          padding: 20px;
-          border-radius: 8px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-          color: #a8c4ff;
-        }
-        .result h3 {
-          margin-top: 0;
-          color: #4db5ff;
-        }
-        .missing-keywords {
-          margin-top: 10px;
-          font-size: 0.9rem;
-          color: #e0aaff;
         }
       `}</style>
 
@@ -284,81 +339,66 @@ export default function Home() {
         <section className="hero" id="hero">
           <h1>ATS Resume Checker</h1>
           <p>
-            Quickly find out if your resume passes Applicant Tracking Systems
-            (ATS) used by employers. Fix missing keywords and boost your chances
-            to get hired.
+            Quickly find out if your resume passes Applicant Tracking Systems (ATS)
+            used by employers. Fix missing keywords and boost your chances to get
+            hired.
           </p>
-          <button
-            className="btn-primary"
-            onClick={() => {
-              document.getElementById("steps").scrollIntoView({ behavior: "smooth" });
-            }}
-          >
-            Get Started
+        </section>
+
+        <section id="form-section">
+          <label htmlFor="resume">Paste Your Resume</label>
+          <textarea
+            id="resume"
+            value={resume}
+            onChange={(e) => setResume(e.target.value)}
+            placeholder="Paste your resume text here..."
+          />
+
+          <label htmlFor="jobDesc">Paste Job Description</label>
+          <textarea
+            id="jobDesc"
+            value={jobDesc}
+            onChange={(e) => setJobDesc(e.target.value)}
+            placeholder="Paste the job description here..."
+          />
+
+          <button className="btn-primary" onClick={handleCheck}>
+            Check ATS Match
           </button>
         </section>
 
-        {/* Form section */}
-        <section id="form-section">
-          <form onSubmit={handleCheck}>
-            <label htmlFor="resume">Paste Your Resume:</label>
-            <textarea
-              id="resume"
-              value={resumeText}
-              onChange={(e) => setResumeText(e.target.value)}
-              placeholder="Paste your resume text here..."
-              required
-            />
-            <label htmlFor="jobdesc">Paste Job Description:</label>
-            <textarea
-              id="jobdesc"
-              value={jobDescText}
-              onChange={(e) => setJobDescText(e.target.value)}
-              placeholder="Paste the job description here..."
-              required
-            />
-            <button className="btn-primary" type="submit">
-              Check ATS Match
-            </button>
-          </form>
-
-          {/* Show results */}
-          {result && (
-            <div className="result" aria-live="polite">
-              <h3>ATS Match Score: {result.score}%</h3>
-              {result.missingKeywords.length > 0 ? (
-                <>
-                  <p>Missing keywords you should add:</p>
-                  <ul className="missing-keywords">
-                    {result.missingKeywords.map((kw, i) => (
-                      <li key={i}>{kw}</li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                <p>Great job! Your resume covers all the important keywords.</p>
-              )}
-              <p style={{ marginTop: "20px" }}>
-                Want to learn more about your resume’s quality?{" "}
+        {showAlert && result && (
+          <section className="alert" aria-live="polite" role="alert">
+            <h3>ATS Match Score: {result.matchPercent}%</h3>
+            {result.missingKeywords.length > 0 ? (
+              <>
+                <p>Missing keywords you should add (max 20):</p>
+                <ul>
+                  {result.missingKeywords.map((kw, i) => (
+                    <li key={i}>{kw}</li>
+                  ))}
+                </ul>
                 <button
                   className="btn-primary"
-                  onClick={() => router.push("/pricing")}
-                  style={{ fontSize: "1rem", padding: "8px 20px" }}
+                  onClick={() => {
+                    setShowAlert(false);
+                  }}
                 >
-                  Upgrade Now
+                  Close
                 </button>
-              </p>
-            </div>
-          )}
-        </section>
+              </>
+            ) : (
+              <p>Great! Your resume matches all important keywords.</p>
+            )}
+          </section>
+        )}
 
         <section id="how-it-works">
           <h2>How It Works</h2>
           <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
-            Paste your resume and the job description you want to apply for. Our system
-            analyzes keywords and gives you a match score along with
-            suggestions to improve your resume and increase your chances of passing
-            ATS filters.
+            Paste your resume and the job description you want to apply for. Our
+            system analyzes keywords and gives you a match score along with a list
+            of missing keywords to improve your resume.
           </p>
         </section>
 
@@ -374,12 +414,12 @@ export default function Home() {
               <p>Copy and paste the job description for your target role.</p>
             </div>
             <div className="step">
-              <h3>3. Get Your Score & Suggestions</h3>
-              <p>See your ATS match score and get clear keyword fixes.</p>
+              <h3>3. Check Your Score</h3>
+              <p>Click "Check ATS Match" to see your keyword match percentage and missing keywords.</p>
             </div>
             <div className="step">
-              <h3>4. Pay & Unlock</h3>
-              <p>Pay a small fee to unlock full resume improvements.</p>
+              <h3>4. Upgrade for More</h3>
+              <p>Upgrade to unlock advanced resume optimization features and suggestions.</p>
             </div>
           </div>
         </section>
@@ -393,29 +433,24 @@ export default function Home() {
 
         <section id="pricing">
           <h2>Pricing Plans</h2>
-          <div style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
-            <h3>Free Access</h3>
-            <p>
-              Get a basic ATS keyword match score and list of missing keywords — free and unlimited.
-              This lets you try the core service with no cost or signup.
-            </p>
-
-            <h3>Basic Optimization - $5 (One-Time)</h3>
-            <p>
-              ATS keyword match score<br />
-              List of missing keywords<br />
-              5 AI-generated resume bullet suggestions (planned for future)<br />
-              Instant access after payment — no signup needed
-            </p>
-
-            <h3>7-Day Unlimited Access - $12</h3>
-            <p>
-              Unlimited resume checks and optimizations<br />
-              Priority processing speed<br />
-              Email receipt and friendly support<br />
-              No subscription — pay once and use for 7 days
-            </p>
-          </div>
+          <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
+            <strong>Free Access</strong><br />
+            Get a basic ATS keyword match score and list of missing keywords — free and unlimited. This lets you try the core service with no cost or signup.
+          </p>
+          <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
+            <strong>Basic Optimization - $5 (One-Time)</strong><br />
+            ATS keyword match score<br />
+            List of missing keywords<br />
+            5 AI-generated resume bullet suggestions (planned for future)<br />
+            Instant access after payment — no signup needed
+          </p>
+          <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
+            <strong>7-Day Unlimited Access - $12</strong><br />
+            Unlimited resume checks and optimizations<br />
+            Priority processing speed<br />
+            Email receipt and friendly support<br />
+            No subscription — pay once and use for 7 days
+          </p>
         </section>
       </main>
 
