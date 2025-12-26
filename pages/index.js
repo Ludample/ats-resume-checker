@@ -237,6 +237,9 @@ export default function Home() {
         </div>
 
         <nav className={navOpen ? "open" : ""}>
+          <a href="#input-form" onClick={() => setNavOpen(false)}>
+            Get Started
+          </a>
           <a href="#how-it-works" onClick={() => setNavOpen(false)}>
             How It Works
           </a>
@@ -261,12 +264,80 @@ export default function Home() {
             className="btn-primary"
             onClick={() => {
               document
-                .getElementById("steps")
+                .getElementById("input-form")
                 .scrollIntoView({ behavior: "smooth" });
             }}
           >
             Get Started
           </button>
+        </section>
+
+        <section id="input-form" style={{ maxWidth: 700, margin: "0 auto 64px" }}>
+          <h2 style={{ color: "#4db5ff", textAlign: "center", marginBottom: 24 }}>
+            Paste Your Resume & Job Description
+          </h2>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              alert("Form submitted! Next: implement resume analysis.");
+              // Placeholder, will add real logic soon
+            }}
+          >
+            <label htmlFor="resume" style={{ color: "#cbd5ff", fontWeight: "600" }}>
+              Your Resume:
+            </label>
+            <textarea
+              id="resume"
+              name="resume"
+              required
+              rows={8}
+              style={{
+                width: "100%",
+                padding: 12,
+                marginBottom: 24,
+                borderRadius: 6,
+                border: "1px solid #4db5ff",
+                fontSize: "1rem",
+                resize: "vertical",
+                backgroundColor: "#06203f",
+                color: "white",
+              }}
+              placeholder="Paste your resume text here..."
+            ></textarea>
+
+            <label
+              htmlFor="jobDescription"
+              style={{ color: "#cbd5ff", fontWeight: "600" }}
+            >
+              Job Description:
+            </label>
+            <textarea
+              id="jobDescription"
+              name="jobDescription"
+              required
+              rows={8}
+              style={{
+                width: "100%",
+                padding: 12,
+                marginBottom: 24,
+                borderRadius: 6,
+                border: "1px solid #4db5ff",
+                fontSize: "1rem",
+                resize: "vertical",
+                backgroundColor: "#06203f",
+                color: "white",
+              }}
+              placeholder="Paste the job description here..."
+            ></textarea>
+
+            <button
+              type="submit"
+              className="btn-primary"
+              style={{ display: "block", margin: "0 auto" }}
+            >
+              Check Resume
+            </button>
+          </form>
         </section>
 
         <section id="how-it-works">
