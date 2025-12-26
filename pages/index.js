@@ -1,51 +1,18 @@
-// pages/index.js
 import { useState } from "react";
 
 export default function Home() {
   const [navOpen, setNavOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [scoreData, setScoreData] = useState(null);
 
-  // Keyword matching function
-  function analyzeResume(resumeText, jobDescText) {
-    const stopwords = new Set([
-      "the", "and", "for", "with", "you", "your", "are", "this", "that", "have", "from", "was", "will",
-      "but", "not", "all", "any", "can", "our", "out", "get", "has", "had", "they", "his", "her", "she",
-      "him", "them", "were", "who", "what", "when", "where", "how", "why", "which", "also", "about",
-      "than", "then", "there", "these", "those", "its", "may", "must", "one", "two", "for", "in", "on",
-      "at", "by", "an", "or", "of", "to", "is", "it", "as", "be", "if", "we", "do", "so", "no"
-    ]);
-
-    function extractKeywords(text) {
-      return text
-        .toLowerCase()
-        .replace(/[^a-z0-9\s]/g, "")
-        .split(/\s+/)
-        .filter(word => word.length > 2)
-        .filter(word => !stopwords.has(word));
-    }
-
-    const jdWords = new Set(extractKeywords(jobDescText));
-    const resumeWords = new Set(extractKeywords(resumeText));
-
-    const matched = [...jdWords].filter(word => resumeWords.has(word));
-    const missing = [...jdWords].filter(word => !resumeWords.has(word));
-    const score = jdWords.size === 0 ? 0 : Math.round((matched.length / jdWords.size) * 100);
-
-    return { score, matched, missing };
+  // Dummy function for scoring, replace with your real logic
+  function performScoring() {
+    // For demo, hardcoding values; replace with actual scoring results
+    const score = 75;
+    const missingKeywords = ["leadership", "budgeting", "compliance"];
+    setScoreData({ score, missingKeywords });
+    setModalOpen(true);
   }
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
-    const resumeText = e.target.resume.value;
-    const jobDescText = e.target.jobDescription.value;
-
-    const result = analyzeResume(resumeText, jobDescText);
-
-    alert(
-      `ATS Match Score: ${result.score}%\n` +
-      `Missing keywords:\n${result.missing.length > 0 ? result.missing.join(", ") : "None!"}`
-    );
-  };
 
   return (
     <>
@@ -224,37 +191,6 @@ export default function Home() {
           color: #a0c8ff;
         }
 
-        /* Pricing */
-        #pricing {
-          max-width: 600px;
-          margin: 0 auto 64px;
-          color: #cbd5ff;
-        }
-        #pricing h2 {
-          color: #4db5ff;
-          margin-bottom: 24px;
-          text-align: center;
-        }
-        #pricing div {
-          background: #08305e;
-          border-radius: 10px;
-          padding: 24px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.4);
-        }
-        #pricing h3 {
-          color: #a8c4ff;
-          margin-top: 0;
-        }
-        #pricing ul {
-          margin-left: 20px;
-          margin-bottom: 24px;
-        }
-        #pricing ul li {
-          margin-bottom: 8px;
-          font-size: 1rem;
-          line-height: 1.4;
-        }
-
         /* Footer */
         footer {
           background: #041a30;
@@ -263,6 +199,63 @@ export default function Home() {
           color: #7a8ca3;
           font-size: 0.9rem;
           user-select: none;
+        }
+
+        /* Modal styles */
+        .modal-backdrop {
+          position: fixed;
+          top: 0; left: 0; right: 0; bottom: 0;
+          background: rgba(0,0,0,0.5);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 1000;
+        }
+        .modal {
+          background: #06203f;
+          padding: 24px;
+          border-radius: 8px;
+          max-width: 400px;
+          color: #e0e7ff;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+          text-align: center;
+          user-select: none;
+        }
+        .modal h3 {
+          margin-top: 0;
+          color: #4db5ff;
+        }
+        .modal p {
+          margin-bottom: 16px;
+        }
+        .modal ul {
+          text-align: left;
+          margin-bottom: 20px;
+          padding-left: 20px;
+        }
+        .btn-close, .btn-upgrade {
+          cursor: pointer;
+          border: none;
+          padding: 10px 20px;
+          border-radius: 6px;
+          font-weight: 700;
+          font-size: 1rem;
+          margin: 0 8px;
+          user-select: none;
+        }
+        .btn-close {
+          background: #355080;
+          color: white;
+        }
+        .btn-close:hover {
+          background: #2a3c6f;
+        }
+        .btn-upgrade {
+          background: #4db5ff;
+          color: #06203f;
+        }
+        .btn-upgrade:hover {
+          background: #3a9ded;
         }
       `}</style>
 
@@ -280,9 +273,6 @@ export default function Home() {
         </div>
 
         <nav className={navOpen ? "open" : ""}>
-          <a href="#input-form" onClick={() => setNavOpen(false)}>
-            Get Started
-          </a>
           <a href="#how-it-works" onClick={() => setNavOpen(false)}>
             How It Works
           </a>
@@ -307,7 +297,7 @@ export default function Home() {
             className="btn-primary"
             onClick={() => {
               document
-                .getElementById("input-form")
+                .getElementById("steps")
                 .scrollIntoView({ behavior: "smooth" });
             }}
           >
@@ -315,75 +305,13 @@ export default function Home() {
           </button>
         </section>
 
-        <section id="input-form" style={{ maxWidth: 700, margin: "0 auto 64px" }}>
-          <h2 style={{ color: "#4db5ff", textAlign: "center", marginBottom: 24 }}>
-            Paste Your Resume & Job Description
-          </h2>
-          <form onSubmit={handleSubmit}>
-            <label htmlFor="resume" style={{ color: "#cbd5ff", fontWeight: "600" }}>
-              Your Resume:
-            </label>
-            <textarea
-              id="resume"
-              name="resume"
-              required
-              rows={8}
-              style={{
-                width: "100%",
-                padding: 12,
-                marginBottom: 24,
-                borderRadius: 6,
-                border: "1px solid #4db5ff",
-                fontSize: "1rem",
-                resize: "vertical",
-                backgroundColor: "#06203f",
-                color: "white",
-              }}
-              placeholder="Paste your resume text here..."
-            ></textarea>
-
-            <label
-              htmlFor="jobDescription"
-              style={{ color: "#cbd5ff", fontWeight: "600" }}
-            >
-              Job Description:
-            </label>
-            <textarea
-              id="jobDescription"
-              name="jobDescription"
-              required
-              rows={8}
-              style={{
-                width: "100%",
-                padding: 12,
-                marginBottom: 24,
-                borderRadius: 6,
-                border: "1px solid #4db5ff",
-                fontSize: "1rem",
-                resize: "vertical",
-                backgroundColor: "#06203f",
-                color: "white",
-              }}
-              placeholder="Paste the job description here..."
-            ></textarea>
-
-            <button
-              type="submit"
-              className="btn-primary"
-              style={{ display: "block", margin: "0 auto" }}
-            >
-              Check Resume
-            </button>
-          </form>
-        </section>
-
         <section id="how-it-works">
           <h2>How It Works</h2>
           <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
-            Paste your resume and the job description you want to apply for. Our tool
-            analyzes the keywords and gives you a match score along with
-            suggestions to improve your resume and increase your chances of passing
-            the ATS filters.
+            Paste your resume and the job description you want to apply for. Our
+            tool analyzes the keywords and gives you a match score along with
+            suggestions to improve your resume and increase your chances of
+            passing the ATS filters.
           </p>
         </section>
 
@@ -404,7 +332,7 @@ export default function Home() {
             </div>
             <div className="step">
               <h3>4. Pay & Unlock</h3>
-              <p>Pay a small fee to unlock full, AI-generated resume improvements.</p>
+              <p>Pay a small fee to unlock full, detailed resume improvements.</p>
             </div>
           </div>
         </section>
@@ -420,30 +348,80 @@ export default function Home() {
 
         <section id="pricing">
           <h2>Pricing</h2>
-          <div>
-            <h3>Basic Optimization</h3>
-            <p>For <strong>$5</strong> you get:</p>
-            <ul>
-              <li>ATS keyword match score</li>
-              <li>List of missing keywords</li>
-              <li>Instant access after payment — no signup needed</li>
-            </ul>
+          <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
+            Free basic ATS score and missing keywords. Unlock the full resume
+            optimization for only <strong>$5</strong>. Unlimited access for 7
+            days for <strong>$12</strong>.
+          </p>
+        </section>
 
-            <h3>7-Day Unlimited Access</h3>
-            <p>For <strong>$12</strong>, you get:</p>
-            <ul>
-              <li>Unlimited resume checks and optimizations</li>
-              <li>Priority processing speed</li>
-              <li>Email receipt and friendly support</li>
-              <li>No subscription — pay once and use for 7 days</li>
-            </ul>
-          </div>
+        {/* Form section */}
+        <section id="form-section" style={{ marginTop: "40px" }}>
+          <h2>Try It Now</h2>
+          <textarea
+            id="resume-input"
+            placeholder="Paste your resume here"
+            style={{ width: "100%", height: "120px", marginBottom: "10px", padding: "8px", borderRadius: "6px", border: "none", fontSize: "1rem" }}
+          />
+          <textarea
+            id="jobdesc-input"
+            placeholder="Paste the job description here"
+            style={{ width: "100%", height: "120px", marginBottom: "10px", padding: "8px", borderRadius: "6px", border: "none", fontSize: "1rem" }}
+          />
+          <button className="btn-primary" onClick={performScoring}>
+            Check Resume
+          </button>
         </section>
       </main>
 
       <footer>
         &copy; {new Date().getFullYear()} ATS Resume Checker. All rights reserved.
       </footer>
+
+      {modalOpen && (
+        <div className="modal-backdrop" onClick={() => setModalOpen(false)}>
+          <div
+            className="modal"
+            onClick={(e) => e.stopPropagation()}
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="modal-title"
+          >
+            <h3 id="modal-title">ATS Match Score: {scoreData.score}%</h3>
+            <p>Missing Keywords:</p>
+            {scoreData.missingKeywords.length ? (
+              <ul>
+                {scoreData.missingKeywords.map((kw, i) => (
+                  <li key={i}>{kw}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>None! Great job!</p>
+            )}
+            <p>
+              Want to learn more about your resume’s quality?{" "}
+              <button
+                className="btn-upgrade"
+                onClick={() => {
+                  setModalOpen(false);
+                  document.getElementById("pricing").scrollIntoView({
+                    behavior: "smooth",
+                  });
+                }}
+              >
+                Upgrade Now
+              </button>
+            </p>
+            <button
+              className="btn-close"
+              onClick={() => setModalOpen(false)}
+              aria-label="Close modal"
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </>
   );
 }
