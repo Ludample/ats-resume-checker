@@ -5,24 +5,50 @@ export default function Home() {
   const [navOpen, setNavOpen] = useState(false);
   const [resumeText, setResumeText] = useState("");
   const [jobDescText, setJobDescText] = useState("");
+  const [result, setResult] = useState(null);
   const router = useRouter();
 
-  // Basic placeholder submit handler (you can add matching logic later)
+  // Simple stop words to ignore very common words
+  const stopWords = new Set([
+    "the", "and", "a", "an", "in", "on", "at", "for", "with", "to", "of", "by",
+    "is", "it", "this", "that", "as", "are", "be", "from", "or", "but", "if",
+    "then", "so", "such", "can", "will", "all", "you", "your", "our", "us",
+  ]);
+
+  const extractKeywords = (text) => {
+    return text
+      .toLowerCase()
+      .match(/\b\w+\b/g) // extract words only
+      .filter((word) => word.length > 2 && !stopWords.has(word)) // ignore short/common words
+      .reduce((set, word) => set.add(word), new Set());
+  };
+
   const handleCheck = (e) => {
     e.preventDefault();
+
     if (!resumeText.trim() || !jobDescText.trim()) {
       alert("Please paste both your resume and the job description.");
       return;
     }
-    // For now just alert; replace with your logic later
-    alert("Resume and Job Description received. Matching logic coming soon!");
+
+    const jobKeywords = extractKeywords(jobDescText);
+    const resumeKeywords = extractKeywords(resumeText);
+
+    const matchedKeywords = [...jobKeywords].filter((kw) => resumeKeywords.has(kw));
+    const missingKeywords = [...jobKeywords].filter((kw) => !resumeKeywords.has(kw));
+
+    const score = Math.round((matchedKeywords.length / jobKeywords.size) * 100);
+
+    setResult({
+      score,
+      missingKeywords,
+    });
   };
 
   return (
     <>
       <style>{`
-        /* (same styles as before, omitted here for brevity but include them in your code) */
-        /* Reset and basics */
+        /* Your existing styles here, unchanged for brevity */
         * {
           box-sizing: border-box;
         }
@@ -191,8 +217,6 @@ export default function Home() {
           font-size: 0.9rem;
           user-select: none;
         }
-
-        /* Form styles */
         form {
           max-width: 700px;
           margin: 0 auto 40px;
@@ -209,6 +233,24 @@ export default function Home() {
           font-size: 1rem;
           font-family: inherit;
           resize: vertical;
+        }
+        .result {
+          max-width: 700px;
+          margin: 0 auto 40px;
+          background: #08305e;
+          padding: 20px;
+          border-radius: 8px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+          color: #a8c4ff;
+        }
+        .result h3 {
+          margin-top: 0;
+          color: #4db5ff;
+        }
+        .missing-keywords {
+          margin-top: 10px;
+          font-size: 0.9rem;
+          color: #e0aaff;
         }
       `}</style>
 
@@ -279,6 +321,35 @@ export default function Home() {
               Check ATS Match
             </button>
           </form>
+
+          {/* Show results */}
+          {result && (
+            <div className="result" aria-live="polite">
+              <h3>ATS Match Score: {result.score}%</h3>
+              {result.missingKeywords.length > 0 ? (
+                <>
+                  <p>Missing keywords you should add:</p>
+                  <ul className="missing-keywords">
+                    {result.missingKeywords.map((kw, i) => (
+                      <li key={i}>{kw}</li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <p>Great job! Your resume covers all the important keywords.</p>
+              )}
+              <p style={{ marginTop: "20px" }}>
+                Want to learn more about your resume’s quality?{" "}
+                <button
+                  className="btn-primary"
+                  onClick={() => router.push("/pricing")}
+                  style={{ fontSize: "1rem", padding: "8px 20px" }}
+                >
+                  Upgrade Now
+                </button>
+              </p>
+            </div>
+          )}
         </section>
 
         <section id="how-it-works">
@@ -321,22 +392,30 @@ export default function Home() {
         </section>
 
         <section id="pricing">
-          <h2>Pricing</h2>
-          <p style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
-            Free basic ATS score and missing keywords.<br/>
-            Unlock the full resume optimization for only <strong>$5</strong>.<br/>
-            Unlimited access for 7 days for <strong>$12</strong>.
-          </p>
-        </section>
+          <h2>Pricing Plans</h2>
+          <div style={{ maxWidth: 600, margin: "0 auto", color: "#cbd5ff" }}>
+            <h3>Free Access</h3>
+            <p>
+              Get a basic ATS keyword match score and list of missing keywords — free and unlimited.
+              This lets you try the core service with no cost or signup.
+            </p>
 
-        <section style={{ textAlign: "center" }}>
-          <button
-            className="btn-primary"
-            onClick={() => router.push("/pricing")}
-            style={{ marginTop: 20 }}
-          >
-            Upgrade Now
-          </button>
+            <h3>Basic Optimization - $5 (One-Time)</h3>
+            <p>
+              ATS keyword match score<br />
+              List of missing keywords<br />
+              5 AI-generated resume bullet suggestions (planned for future)<br />
+              Instant access after payment — no signup needed
+            </p>
+
+            <h3>7-Day Unlimited Access - $12</h3>
+            <p>
+              Unlimited resume checks and optimizations<br />
+              Priority processing speed<br />
+              Email receipt and friendly support<br />
+              No subscription — pay once and use for 7 days
+            </p>
+          </div>
         </section>
       </main>
 
