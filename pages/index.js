@@ -11,7 +11,7 @@ const supabase = createClient(
 );
 
 /* =========================
-   Keyword logic
+   ATS helpers (unchanged)
 ========================= */
 const STOPWORDS = new Set([
   "i","me","my","myself","we","our","ours","ourselves","you","your","yours",
@@ -34,13 +34,14 @@ function tokenize(text) {
     .replace(/[^a-z0-9\s]/g, " ")
     .split(/\s+/)
     .filter(Boolean)
-    .filter(word => !STOPWORDS.has(word));
+    .filter(w => !STOPWORDS.has(w));
 }
 
 function extractKeywords(text) {
-  const words = tokenize(text);
   const counts = {};
-  words.forEach(w => (counts[w] = (counts[w] || 0) + 1));
+  tokenize(text).forEach(w => {
+    counts[w] = (counts[w] || 0) + 1;
+  });
   return Object.entries(counts)
     .sort((a, b) => b[1] - a[1])
     .slice(0, 50)
@@ -53,7 +54,7 @@ function intersection(a, b) {
 }
 
 /* =========================
-   Component
+   Page
 ========================= */
 export default function Home() {
   const [navOpen, setNavOpen] = useState(false);
@@ -62,9 +63,14 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
 
-  /* 🔑 AUTH STATE */
+  // auth + subscription
   const [user, setUser] = useState(null);
+  const [subscription, setSubscription] = useState(null);
+  const [loadingSub, setLoadingSub] = useState(true);
 
+  /* =========================
+     Auth listener
+  ========================= */
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       setUser(data.user);
@@ -76,15 +82,55 @@ export default function Home() {
       }
     );
 
-    return () => listener.subscription.unsubscribe();
+    return () => {
+      listener.subscription.unsubscribe();
+    };
   }, []);
+
+  /* =========================
+     Fetch subscription
+  ========================= */
+  useEffect(() => {
+    if (!user) {
+      setSubscription(null);
+      setLoadingSub(false);
+      return;
+    }
+
+    const fetchSubscription = async () => {
+      setLoadingSub(true);
+
+      const { data, error } = await supabase
+        .from("subscriptions")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+
+      if (!error) setSubscription(data);
+      else setSubscription(null);
+
+      setLoadingSub(false);
+    };
+
+    fetchSubscription();
+  }, [user]);
+
+  /* =========================
+     Helpers
+  ========================= */
+  const isSubscriptionActive = () => {
+    if (!subscription) return false;
+    if (!subscription.active) return false;
+    if (!subscription.expires_at) return false;
+    return new Date(subscription.expires_at) > new Date();
+  };
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
   };
 
   /* =========================
-     ATS Check
+     ATS check
   ========================= */
   function handleCheck() {
     if (!resume.trim() || !jobDesc.trim()) {
@@ -108,118 +154,78 @@ export default function Home() {
     setShowAlert(true);
   }
 
+  /* =========================
+     UI
+  ========================= */
   return (
     <>
-      {/* =========================
-          STYLES (unchanged)
-      ========================= */}
-      <style>{`
-        * { box-sizing: border-box; }
-        body {
-          margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-          background-color: #0a2540;
-          color: white;
-        }
-        a { color: #4db5ff; text-decoration: none; }
-        header {
-          background: #06203f;
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding: 20px;
-          position: sticky;
-          top: 0;
-          z-index: 10;
-        }
-        nav { display: flex; gap: 20px; align-items: center; }
-        .btn-primary {
-          background: #4db5ff;
-          color: #06203f;
-          padding: 10px 16px;
-          border-radius: 6px;
-          border: none;
-          font-weight: 700;
-          cursor: pointer;
-        }
-        textarea {
-          width: 100%;
-          min-height: 150px;
-          padding: 12px;
-          border-radius: 6px;
-          border: none;
-          margin-bottom: 20px;
-        }
-        .container { max-width: 960px; margin: 0 auto; padding: 20px; }
-        .alert {
-          background: #08305e;
-          padding: 20px;
-          border-radius: 10px;
-          margin: 30px auto;
-          max-width: 700px;
-        }
-      `}</style>
-
-      {/* =========================
-          HEADER
-      ========================= */}
       <header>
         <div className="logo">ATS Resume Checker</div>
 
-        <nav>
-          <a href="#how-it-works">How It Works</a>
-          <a href="#steps">Steps</a>
-          <a href="#pricing">Pricing</a>
-          <a href="/pricing" className="btn-primary">Upgrade Now</a>
+        <div className="nav-toggle" onClick={() => setNavOpen(!navOpen)}>
+          <span></span><span></span><span></span>
+        </div>
 
+        <nav className={navOpen ? "open" : ""}>
+          <a href="#pricing">Pricing</a>
           {user ? (
-            <button onClick={handleLogout} className="btn-primary">
-              Logout
-            </button>
+            <button onClick={handleLogout}>Logout</button>
           ) : (
-            <a href="/login" className="btn-primary">
-              Login
-            </a>
+            <a href="/login">Login</a>
           )}
         </nav>
       </header>
 
-      {/* =========================
-          MAIN
-      ========================= */}
       <main className="container">
         <h1>ATS Resume Checker</h1>
 
-        <textarea
-          placeholder="Paste your resume"
-          value={resume}
-          onChange={e => setResume(e.target.value)}
-        />
+        <label>Paste Your Resume</label>
+        <textarea value={resume} onChange={e => setResume(e.target.value)} />
 
-        <textarea
-          placeholder="Paste job description"
-          value={jobDesc}
-          onChange={e => setJobDesc(e.target.value)}
-        />
+        <label>Paste Job Description</label>
+        <textarea value={jobDesc} onChange={e => setJobDesc(e.target.value)} />
 
-        <button className="btn-primary" onClick={handleCheck}>
+        <button
+          className="btn-primary"
+          onClick={handleCheck}
+          disabled={user && !isSubscriptionActive()}
+          style={{
+            opacity: user && !isSubscriptionActive() ? 0.5 : 1,
+            cursor: user && !isSubscriptionActive() ? "not-allowed" : "pointer"
+          }}
+        >
           Check ATS Match
         </button>
 
+        {user && !loadingSub && !isSubscriptionActive() && (
+          <p style={{ color: "#f77", marginTop: 12 }}>
+            Your access has expired. Please upgrade.
+          </p>
+        )}
+
+        {user && subscription && (
+          <p style={{ color: "#4db5ff", marginTop: 10 }}>
+            Access valid until{" "}
+            {new Date(subscription.expires_at).toLocaleDateString()}
+          </p>
+        )}
+
         {showAlert && result && (
-          <div className="alert">
-            <h3>ATS Match: {result.matchPercent}%</h3>
-            <ul>
-              {result.missingKeywords.map((k, i) => (
-                <li key={i}>{k}</li>
-              ))}
-            </ul>
-          </div>
+          <section className="alert">
+            <h3>ATS Match Score: {result.matchPercent}%</h3>
+            {result.missingKeywords.length > 0 && (
+              <ul>
+                {result.missingKeywords.map((k, i) => (
+                  <li key={i}>{k}</li>
+                ))}
+              </ul>
+            )}
+          </section>
         )}
       </main>
 
-      <footer style={{ textAlign: "center", padding: 20 }}>
-        © {new Date().getFullYear()} ATS Resume Checker
+      <footer>
+        &copy; {new Date().getFullYear()} ATS Resume Checker
       </footer>
     </>
   );
