@@ -11,7 +11,7 @@ const supabase = createClient(
 );
 
 /* =========================
-   ATS helpers (unchanged)
+   ATS helpers
 ========================= */
 const STOPWORDS = new Set([
   "i","me","my","myself","we","our","ours","ourselves","you","your","yours",
@@ -63,13 +63,12 @@ export default function Home() {
   const [result, setResult] = useState(null);
   const [showAlert, setShowAlert] = useState(false);
 
-  // auth + subscription
   const [user, setUser] = useState(null);
   const [subscription, setSubscription] = useState(null);
   const [loadingSub, setLoadingSub] = useState(true);
 
   /* =========================
-     Auth listener
+     Auth
   ========================= */
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -88,7 +87,7 @@ export default function Home() {
   }, []);
 
   /* =========================
-     Fetch subscription
+     Subscription
   ========================= */
   useEffect(() => {
     if (!user) {
@@ -100,24 +99,19 @@ export default function Home() {
     const fetchSubscription = async () => {
       setLoadingSub(true);
 
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from("subscriptions")
         .select("*")
         .eq("id", user.id)
         .single();
 
-      if (!error) setSubscription(data);
-      else setSubscription(null);
-
+      setSubscription(data || null);
       setLoadingSub(false);
     };
 
     fetchSubscription();
   }, [user]);
 
-  /* =========================
-     Helpers
-  ========================= */
   const isSubscriptionActive = () => {
     if (!subscription) return false;
     if (!subscription.active) return false;
@@ -130,7 +124,7 @@ export default function Home() {
   };
 
   /* =========================
-     ATS check
+     ATS Check
   ========================= */
   function handleCheck() {
     if (!resume.trim() || !jobDesc.trim()) {
@@ -153,6 +147,23 @@ export default function Home() {
     setResult({ matchPercent, missingKeywords: missing });
     setShowAlert(true);
   }
+
+  /* =========================
+     Pricing handlers (YOCO)
+  ========================= */
+  const handlePayment = (plan) => {
+    if (!user) {
+      alert("Please log in before purchasing.");
+      return;
+    }
+
+    const baseUrl =
+      plan === "basic"
+        ? "https://pay.yoco.com/r/7lOlyX"
+        : "https://pay.yoco.com/r/melxn0";
+
+    window.location.href = `${baseUrl}?user_id=${user.id}&plan=${plan}`;
+  };
 
   /* =========================
      UI
@@ -189,39 +200,47 @@ export default function Home() {
           className="btn-primary"
           onClick={handleCheck}
           disabled={user && !isSubscriptionActive()}
-          style={{
-            opacity: user && !isSubscriptionActive() ? 0.5 : 1,
-            cursor: user && !isSubscriptionActive() ? "not-allowed" : "pointer"
-          }}
         >
           Check ATS Match
         </button>
 
-        {user && !loadingSub && !isSubscriptionActive() && (
-          <p style={{ color: "#f77", marginTop: 12 }}>
-            Your access has expired. Please upgrade.
-          </p>
-        )}
-
-        {user && subscription && (
-          <p style={{ color: "#4db5ff", marginTop: 10 }}>
-            Access valid until{" "}
-            {new Date(subscription.expires_at).toLocaleDateString()}
-          </p>
-        )}
-
         {showAlert && result && (
           <section className="alert">
             <h3>ATS Match Score: {result.matchPercent}%</h3>
-            {result.missingKeywords.length > 0 && (
-              <ul>
-                {result.missingKeywords.map((k, i) => (
-                  <li key={i}>{k}</li>
-                ))}
-              </ul>
-            )}
+            <ul>
+              {result.missingKeywords.map((k, i) => (
+                <li key={i}>{k}</li>
+              ))}
+            </ul>
           </section>
         )}
+
+        {/* =========================
+            Pricing
+        ========================= */}
+        <section id="pricing" style={{ marginTop: 60 }}>
+          <h2>Pricing</h2>
+
+          <div className="pricing">
+            <div className="card">
+              <h3>Basic</h3>
+              <p>One-time resume check</p>
+              <strong>R99</strong>
+              <button onClick={() => handlePayment("basic")}>
+                Buy Basic
+              </button>
+            </div>
+
+            <div className="card">
+              <h3>Premium</h3>
+              <p>7-day unlimited access</p>
+              <strong>R199</strong>
+              <button onClick={() => handlePayment("premium")}>
+                Buy Premium
+              </button>
+            </div>
+          </div>
+        </section>
       </main>
 
       <footer>
