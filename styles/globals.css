@@ -1,25 +1,34 @@
-/* Reset */
+/* RESET */
 * {
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
-  box-sizing: border-box;
 }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
-    Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-  background: #0b0f19;
-  color: #e6e6eb;
+html, body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0b0f1a;
+  color: #ffffff;
   line-height: 1.6;
 }
 
-/* Layout */
-header {
-  background: #11162a;
-  padding: 16px 24px;
+/* LINKS */
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* HEADER */
+.header {
+  width: 100%;
+  padding: 16px 32px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  background: #0f1629;
+  position: sticky;
+  top: 0;
+  z-index: 10;
 }
 
 .logo {
@@ -27,94 +36,188 @@ header {
   font-size: 18px;
 }
 
-nav a,
-nav button {
-  margin-left: 16px;
-  color: #e6e6eb;
-  text-decoration: none;
+nav {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+nav a, nav button {
   background: none;
   border: none;
+  color: #ffffff;
   cursor: pointer;
   font-size: 14px;
 }
 
-nav a:hover,
-nav button:hover {
-  color: #4db5ff;
+.menu {
+  display: none;
 }
 
+/* HERO */
+.hero {
+  max-width: 900px;
+  margin: 80px auto;
+  padding: 0 24px;
+  text-align: center;
+}
+
+.hero h1 {
+  font-size: 42px;
+  margin-bottom: 16px;
+}
+
+.hero p {
+  font-size: 18px;
+  margin-bottom: 32px;
+  color: #cbd5f5;
+}
+
+/* BUTTONS */
+.btn-primary {
+  background: linear-gradient(135deg, #4f46e5, #7c3aed);
+  color: #ffffff;
+  padding: 14px 28px;
+  border-radius: 10px;
+  font-weight: 600;
+  display: inline-block;
+  border: none;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-primary.full {
+  width: 100%;
+}
+
+.btn-primary:hover {
+  opacity: 0.9;
+}
+
+/* MAIN CONTAINER */
 .container {
   max-width: 900px;
-  margin: 40px auto;
-  padding: 0 16px;
-}
-
-h1 {
-  margin-bottom: 20px;
+  margin: 0 auto;
+  padding: 40px 24px;
 }
 
 label {
   display: block;
-  margin: 16px 0 6px;
+  margin-top: 24px;
+  margin-bottom: 8px;
+  font-weight: 600;
 }
 
 textarea {
   width: 100%;
   min-height: 140px;
   padding: 12px;
-  background: #161c33;
-  border: 1px solid #2a3158;
-  color: #fff;
-  border-radius: 6px;
+  border-radius: 8px;
+  border: none;
   resize: vertical;
 }
 
-textarea:focus {
-  outline: none;
-  border-color: #4db5ff;
-}
-
-button {
-  font-family: inherit;
-}
-
-.btn-primary {
-  margin-top: 20px;
-  padding: 12px 18px;
-  background: #4db5ff;
-  border: none;
-  border-radius: 6px;
-  color: #000;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.btn-primary:hover {
-  background: #2fa4ff;
-}
-
-/* Results */
+/* RESULT */
 .alert {
-  margin-top: 30px;
-  padding: 16px;
-  background: #161c33;
-  border: 1px solid #2a3158;
-  border-radius: 8px;
+  margin-top: 32px;
+  padding: 24px;
+  background: #121a35;
+  border-radius: 12px;
 }
 
 .alert ul {
-  margin-top: 10px;
-  padding-left: 18px;
+  margin-top: 12px;
+  padding-left: 20px;
 }
 
-.alert li {
-  margin-bottom: 4px;
+/* SECTIONS */
+.section {
+  padding: 80px 24px;
+  max-width: 1100px;
+  margin: 0 auto;
 }
 
-/* Footer */
-footer {
+.section h2 {
   text-align: center;
-  padding: 30px 0;
-  color: #888;
-  font-size: 14px;
+  font-size: 32px;
+  margin-bottom: 48px;
+}
+
+.section.dark {
+  background: #0f1629;
+}
+
+/* HOW IT WORKS */
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 24px;
+}
+
+.card {
+  background: #121a35;
+  padding: 32px;
+  border-radius: 14px;
+  text-align: center;
+  font-weight: 600;
+}
+
+/* PRICING */
+.pricing {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 32px;
+}
+
+.price-card {
+  background: #121a35;
+  padding: 32px;
+  border-radius: 16px;
+  text-align: center;
+}
+
+.price-card.featured {
+  outline: 2px solid #7c3aed;
+}
+
+.price {
+  font-size: 36px;
+  margin: 16px 0;
+}
+
+/* FOOTER */
+.footer {
+  padding: 40px;
+  text-align: center;
+  color: #9aa3c7;
+}
+
+/* MOBILE */
+@media (max-width: 768px) {
+  nav {
+    display: none;
+  }
+
+  nav.open {
+    display: flex;
+    flex-direction: column;
+    position: absolute;
+    right: 20px;
+    top: 70px;
+    background: #121a35;
+    padding: 20px;
+    border-radius: 12px;
+  }
+
+  .menu {
+    display: block;
+    font-size: 24px;
+    background: none;
+    border: none;
+    color: #ffffff;
+  }
+
+  .hero h1 {
+    font-size: 32px;
+  }
 }
