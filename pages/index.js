@@ -54,7 +54,7 @@ function intersection(a, b) {
 }
 
 /* =========================
-   YOCO LINKS (REAL)
+   YOCO LINKS
 ========================= */
 const YOCO_BASIC_LINK = "https://pay.yoco.com/r/7lOlyX";
 const YOCO_PREMIUM_LINK = "https://pay.yoco.com/r/melxn0";
@@ -176,7 +176,7 @@ export default function Home() {
 
         <nav className={navOpen ? "open" : ""}>
           <a href="#how">How It Works</a>
-          <a href="#pricing">Pricing</a>
+          <a href="/pricing">Pricing</a>
           {user ? (
             <button onClick={handleLogout}>Logout</button>
           ) : (
@@ -191,8 +191,8 @@ export default function Home() {
 
       <section className="hero">
         <h1>Beat ATS. Get More Interviews.</h1>
-        <p>Check how well your resume matches any job description.</p>
-        <a href="#pricing" className="btn-primary">
+        <p>See exactly why your resume gets rejected — and how to fix it.</p>
+        <a href="/pricing" className="btn-primary">
           Upgrade Now
         </a>
       </section>
@@ -228,8 +228,8 @@ export default function Home() {
         <h2>How It Works</h2>
         <div className="cards">
           <div className="card">Paste your resume</div>
-          <div className="card">Paste job description</div>
-          <div className="card">Get ATS score + missing keywords</div>
+          <div className="card">Paste the job description</div>
+          <div className="card">See missing keywords & ATS score</div>
         </div>
       </section>
 
@@ -238,9 +238,23 @@ export default function Home() {
 
         <div className="pricing">
           <div className="price-card">
+            <h3>Free</h3>
+            <p className="price">$0</p>
+            <p>
+              • Basic ATS match score<br />
+              • Limited missing keywords preview<br />
+              • No optimization suggestions
+            </p>
+          </div>
+
+          <div className="price-card">
             <h3>Basic</h3>
-            <p className="price">R99</p>
-            <p>One-time resume check</p>
+            <p className="price">$5</p>
+            <p>
+              • Full ATS score<br />
+              • Full missing keywords list<br />
+              • One complete resume check
+            </p>
             <button className="btn-primary full" onClick={() => goPay("basic")}>
               Buy Basic
             </button>
@@ -248,8 +262,12 @@ export default function Home() {
 
           <div className="price-card featured">
             <h3>Premium</h3>
-            <p className="price">R199</p>
-            <p>7-day unlimited access</p>
+            <p className="price">$12</p>
+            <p>
+              • Unlimited resume checks for 7 days<br />
+              • Apply to multiple jobs faster<br />
+              • Priority processing
+            </p>
             <button className="btn-primary full" onClick={() => goPay("premium")}>
               Buy Premium
             </button>
