@@ -7,25 +7,16 @@ export default function Pricing() {
       <style>{`
         body {
           margin: 0;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-            Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
           background-color: #0a2540;
           color: white;
         }
-        a {
-          color: #4db5ff;
-          text-decoration: none;
-        }
-        a:hover {
-          text-decoration: underline;
-        }
         .container {
-          max-width: 700px;
+          max-width: 720px;
           margin: 40px auto;
-          padding: 20px;
+          padding: 24px;
           background: #06203f;
-          border-radius: 8px;
-          box-shadow: 0 4px 12px rgba(0,0,0,0.7);
+          border-radius: 10px;
         }
         h1, h2 {
           color: #4db5ff;
@@ -33,86 +24,68 @@ export default function Pricing() {
         }
         ul {
           list-style: none;
-          padding-left: 0;
-          margin-bottom: 40px;
+          padding: 0;
         }
         li {
           padding: 8px 0;
           border-bottom: 1px solid #12416a;
-          font-size: 1.1rem;
         }
         .price {
           font-size: 2rem;
-          font-weight: 700;
-          margin-top: 0;
           color: #a0c8ff;
+          text-align: center;
         }
         .btn-primary {
           display: block;
           width: 100%;
-          background-color: #4db5ff;
-          border: none;
-          padding: 14px 0;
-          border-radius: 6px;
+          margin-top: 16px;
+          background: #4db5ff;
           color: #06203f;
+          padding: 14px;
+          border-radius: 6px;
+          text-align: center;
           font-weight: 700;
-          font-size: 1.2rem;
-          cursor: pointer;
-          text-align: center;
           text-decoration: none;
-          user-select: none;
-          transition: background-color 0.3s ease;
-        }
-        .btn-primary:hover {
-          background-color: #3a9ded;
-        }
-        .back-link {
-          display: block;
-          margin-top: 20px;
-          text-align: center;
-          font-size: 0.9rem;
-          color: #7a8ca3;
-          user-select: none;
         }
       `}</style>
 
       <main className="container">
-        <h1>Pricing Plans</h1>
+        <h1>Choose Your Plan</h1>
 
         <section>
-          <h2>Free Access</h2>
-          <p>
-            Get a basic ATS keyword match score and list of missing keywords — free and unlimited.
-            This lets you try the core service with no cost or signup.
-          </p>
+          <h2>Free</h2>
+          <p className="price">$0</p>
+          <ul>
+            <li>Basic ATS match percentage</li>
+            <li>Limited keyword feedback</li>
+            <li>Good for quick testing</li>
+          </ul>
         </section>
 
         <section>
-          <h2>Basic Optimization - $5 (One-Time)</h2>
+          <h2>Basic – One-Time Optimization</h2>
           <p className="price">$5</p>
           <ul>
-            <li>ATS keyword match score</li>
-            <li>List of missing keywords</li>
-            <li>5 AI-generated resume bullet suggestions (planned for future)</li>
-            <li>Instant access after payment — no signup needed</li>
+            <li>Complete ATS score</li>
+            <li>Full missing keywords list</li>
+            <li>One full resume analysis</li>
+            <li>Best for a single job application</li>
           </ul>
-          <a href="#" className="btn-primary">Pay $5 Now</a>
         </section>
 
         <section>
-          <h2>7-Day Unlimited Access - $12</h2>
+          <h2>Premium – 7 Day Unlimited</h2>
           <p className="price">$12</p>
           <ul>
-            <li>Unlimited resume checks and optimizations</li>
-            <li>Priority processing speed</li>
-            <li>Email receipt and friendly support</li>
-            <li>No subscription — pay once and use for 7 days</li>
+            <li>Unlimited resume checks</li>
+            <li>Optimize for multiple job postings</li>
+            <li>Priority processing</li>
+            <li>No subscription, pay once</li>
           </ul>
-          <a href="#" className="btn-primary">Pay $12 Now</a>
         </section>
 
         <Link href="/">
-          <a className="back-link">← Back to Home</a>
+          <a className="btn-primary">← Back to App</a>
         </Link>
       </main>
     </>
